@@ -92,12 +92,13 @@ class _HomeState extends State<Home> {
             Container(
               margin: EdgeInsets.only(left: 20.0),
               height: 70,
-              child: ListView.builder(itemCount: categories.length,
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (context, index)  {
-                return  CategoryTile(image: categories[index]);
-              }),
+              child: ListView.builder(
+                  itemCount: categories.length,
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, index) {
+                    return CategoryTile(image: categories[index]);
+                  }),
             )
           ],
         ),
@@ -105,23 +106,27 @@ class _HomeState extends State<Home> {
     );
   }
 }
-  class CategoryTile extends StatelessWidget{
-    String image;
-    
-    CategoryTile ({required this.image});
-    @override
-    Widget build(BuildContext context){
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.white
-        ),
-        height: 90,
-        width: 90,
-        child: Column(children: [
-          Image.asset(image),
-        ],),
-      );
-    }
+
+class CategoryTile extends StatelessWidget {
+  final String image;
+
+  CategoryTile({required this.image});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(color: Colors.white),
+      height: 90,
+      width: 90,
+      child: Column(
+        children: [
+          Image.asset(
+            image,
+            errorBuilder: (context, error, stackTrace) =>
+                Icon(Icons.error), // Optional: Show error icon if image fails
+          ),
+        ],
+      ),
+    );
   }
-
-
+}
