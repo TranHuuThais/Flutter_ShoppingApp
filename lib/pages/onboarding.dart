@@ -11,15 +11,15 @@ class _OnboardingState extends State<Onboarding> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 234, 235, 231),
+      backgroundColor: const Color.fromARGB(255, 234, 235, 231),
       body: Container(
-        margin: EdgeInsets.only(top: 50.0),
+        margin: const EdgeInsets.only(top: 50.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Image.asset("images/headphone.PNG"),
-            Padding(
-              padding: const EdgeInsets.only(left: 20.0),
+            const Padding(
+              padding: EdgeInsets.only(left: 20.0),
               child: Text(
                 "Explore\nThe Best\nProducts",
                 style: TextStyle(
@@ -29,19 +29,19 @@ class _OnboardingState extends State<Onboarding> {
                 ),
               ),
             ),
-            SizedBox(height: 20.0), // Corrected missing comma
+            const SizedBox(height: 20.0), // Corrected missing comma
             Row(
               // Correctly placed Row widget inside the Column's children
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Container(
-                  margin: EdgeInsets.only(right: 20.0),
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
+                  margin: const EdgeInsets.only(right: 20.0),
+                  padding: const EdgeInsets.all(20),
+                  decoration: const BoxDecoration(
                     color: Colors.black,
                     shape: BoxShape.circle,
                   ),
-                  child: Text(
+                  child: const Text(
                     "Next",
                     style: TextStyle(
                       color: Colors.white,
