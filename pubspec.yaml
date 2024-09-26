@@ -7,7 +7,7 @@ version: 1.0.0+1
 environment:
   sdk: ">=3.0.0 <4.0.0"
 
-dependencies:
+ddependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
@@ -22,3 +22,5 @@ flutter:
 
   assets:
     - images/ # This ensures Flutter loads all images from the images/ folder
+dependencies:
+  curved_navigation_bar: ^1.0.6
