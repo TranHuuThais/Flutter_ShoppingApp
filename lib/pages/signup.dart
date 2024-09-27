@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:random_string/random_string.dart';
 import 'package:shoppingapp/pages/bottomnav.dart';
 import 'package:shoppingapp/pages/login.dart';
+import 'package:shoppingapp/services/database.dart';
 import 'package:shoppingapp/widget/support_widget.dart';
 
 class SignUp extends StatefulWidget {
@@ -30,6 +32,15 @@ class _SignUpState extends State<SignUp> {
               "Registered Successfully",
               style: TextStyle(fontSize: 20.0),
             )));
+        String Id = randomAlphaNumeric(10);
+        Map<String, dynamic> userInfoMap = {
+          "Name": namecontroller.text,
+          "Email": emailcontroller.text,
+          "Id": Id,
+          "Image":
+              "https://firebasestorage.googleapis.com/v0/b/barberapp-ebcc1.appspot.com/o/icon1.png?alt=media&token=0fad24a5-a01b-4d67-b4a0-676fbc75b34a"
+        };
+        await DatabaseMethods().addUserDetails(userInfoMap, Id);
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => Bottomnav()));
       } on FirebaseException catch (e) {
@@ -95,7 +106,8 @@ class _SignUpState extends State<SignUp> {
                 const SizedBox(height: 20.0),
                 Text("Password", style: AppWidget.semiBoldTextFeildStyle()),
                 const SizedBox(height: 20.0),
-                _buildTextField("Password", passwordcontroller, obscureText: true),
+                _buildTextField("Password", passwordcontroller,
+                    obscureText: true),
                 const SizedBox(height: 50.0),
                 _buildSignUpButton(),
                 const SizedBox(height: 20.0),
@@ -113,7 +125,8 @@ class _SignUpState extends State<SignUp> {
     return Container(
       padding: const EdgeInsets.only(left: 20.0),
       decoration: BoxDecoration(
-          color: const Color(0xfff4f5f9), borderRadius: BorderRadius.circular(20)),
+          color: const Color(0xfff4f5f9),
+          borderRadius: BorderRadius.circular(20)),
       child: TextFormField(
         controller: controller,
         obscureText: obscureText,
@@ -123,7 +136,8 @@ class _SignUpState extends State<SignUp> {
           }
           return null;
         },
-        decoration: InputDecoration(border: InputBorder.none, hintText: hintText),
+        decoration:
+            InputDecoration(border: InputBorder.none, hintText: hintText),
       ),
     );
   }
@@ -161,7 +175,8 @@ class _SignUpState extends State<SignUp> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text("Already have an account? ", style: AppWidget.LightTextFeildStyle()),
+        Text("Already have an account? ",
+            style: AppWidget.LightTextFeildStyle()),
         GestureDetector(
           onTap: () {
             Navigator.push(
@@ -169,7 +184,9 @@ class _SignUpState extends State<SignUp> {
           },
           child: const Text("Sign In",
               style: TextStyle(
-                  color: Colors.green, fontSize: 18.0, fontWeight: FontWeight.w500)),
+                  color: Colors.green,
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.w500)),
         ),
       ],
     );

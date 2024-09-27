@@ -15,6 +15,7 @@ dependencies:  # Correct section
   cloud_firestore: 
   firebase_core: 
   firebase_auth: 
+  random_string: ^2.3.1
 
 dev_dependencies:
   flutter_test:
