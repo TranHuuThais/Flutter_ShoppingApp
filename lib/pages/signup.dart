@@ -4,6 +4,7 @@ import 'package:random_string/random_string.dart';
 import 'package:shoppingapp/pages/bottomnav.dart';
 import 'package:shoppingapp/pages/login.dart';
 import 'package:shoppingapp/services/database.dart';
+import 'package:shoppingapp/services/shared_pref.dart';
 import 'package:shoppingapp/widget/support_widget.dart';
 
 class SignUp extends StatefulWidget {
@@ -33,6 +34,11 @@ class _SignUpState extends State<SignUp> {
               style: TextStyle(fontSize: 20.0),
             )));
         String Id = randomAlphaNumeric(10);
+        await SharedPreferenceHelper().saveUserEmail(emailcontroller.text);
+        await SharedPreferenceHelper().saveUserId(Id);
+        await SharedPreferenceHelper().saveUserName(namecontroller.text);
+        await SharedPreferenceHelper().saveUserImage(
+            "https://firebasestorage.googleapis.com/v0/b/barberapp-ebcc1.appspot.com/o/icon1.png?alt=media&token=0fad24a5-a01b-4d67-b4a0-676fbc75b34a");
         Map<String, dynamic> userInfoMap = {
           "Name": namecontroller.text,
           "Email": emailcontroller.text,
