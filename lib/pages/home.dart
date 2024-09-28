@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shoppingapp/pages/category_products.dart';
 import 'package:shoppingapp/widget/support_widget.dart';
 
 class Home extends StatefulWidget {
@@ -14,6 +15,12 @@ class _HomeState extends State<Home> {
     "images/laptop.png",
     "images/watch.png",
     "images/TV.png",
+  ];
+  List Categoryname = [
+    "Headphones",  
+    "TV",
+    "Laptop",
+    "Watch",
   ];
 
   @override
@@ -36,7 +43,7 @@ class _HomeState extends State<Home> {
                       style: AppWidget.boldTextFeildStyle(),
                     ),
                     Text(
-                      "Good Moring",
+                      "Good Morning",
                       style: AppWidget.LightTextFeildStyle(),
                     ),
                   ],
@@ -45,12 +52,10 @@ class _HomeState extends State<Home> {
                   borderRadius: BorderRadius.circular(20),
                   child: Image.asset("images/boy.jpg",
                       height: 80, width: 80, fit: BoxFit.cover),
-                )
+                ),
               ],
             ),
-            const SizedBox(
-              height: 30.0,
-            ),
+            const SizedBox(height: 30.0),
             Container(
               decoration: BoxDecoration(
                   color: Colors.white, borderRadius: BorderRadius.circular(10)),
@@ -66,9 +71,7 @@ class _HomeState extends State<Home> {
                     )),
               ),
             ),
-            const SizedBox(
-              height: 20.0,
-            ),
+            const SizedBox(height: 20.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -82,46 +85,50 @@ class _HomeState extends State<Home> {
                       color: Color(0xFFfd6f3e),
                       fontSize: 20.0,
                       fontWeight: FontWeight.bold),
-                )
+                ),
               ],
             ),
-            SizedBox(height: 20.0),
+            const SizedBox(height: 20.0),
             Row(
               children: [
                 Container(
-                    height: 130,
-                    padding: EdgeInsets.all(20),
-                    margin: EdgeInsets.only(right: 20.0),
-                    decoration: BoxDecoration(
-                        color: Color(0xFFFD6F3E),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Center(
-                        child: Text(
+                  height: 130,
+                  padding: const EdgeInsets.all(20),
+                  margin: const EdgeInsets.only(right: 20.0),
+                  decoration: BoxDecoration(
+                      color: Color(0xFFFD6F3E),
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Center(
+                    child: Text(
                       "All",
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 20.0,
                           fontWeight: FontWeight.bold),
-                    ))),
+                    ),
+                  ),
+                ),
                 Expanded(
                   child: Container(
                     margin: const EdgeInsets.only(left: 20.0),
                     height: 130,
                     child: ListView.builder(
-                        padding: EdgeInsets.zero,
-                        itemCount: categories.length,
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) {
-                          return CategoryTile(image: categories[index]);
-                        }),
+                      padding: EdgeInsets.zero,
+                      itemCount: categories.length,
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (context, index) {
+                        return CategoryTile(
+                          image: categories[index],
+                          name: Categoryname[index],
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
             ),
-            SizedBox(
-              height: 30.0,
-            ),
+            const SizedBox(height: 30.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -134,147 +141,21 @@ class _HomeState extends State<Home> {
                   style: TextStyle(
                       color: Color(0xFFfd6f3e),
                       fontSize: 20.0,
-                      fontWeight: FontWeight.bold)
+                      fontWeight: FontWeight.bold),
                 ),
               ],
             ),
-            SizedBox(
-              height: 20.0,
-            ),
+            const SizedBox(height: 20.0),
             Container(
               height: 240,
               child: ListView(
                 shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 children: [
-                  Container(
-                    margin: EdgeInsets.only(right: 20.0),
-                    padding: EdgeInsets.symmetric(horizontal: 20.0),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Column(
-                      children: [
-                        Image.asset("images/headphone2.png",
-                            height: 150, width: 150, fit: BoxFit.cover),
-                        Text(
-                          "Headphone",
-                          style: AppWidget.semiBoldTextFeildStyle(),
-                        ),
-                        SizedBox(
-                          height: 10.0,
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              "\$100",
-                              style: TextStyle(
-                                  color: Color(0xFFfd6f3e),
-                                  fontSize: 22.0,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(
-                              width: 50.0,
-                            ),
-                            Container(
-                                padding: EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                    color: Color(0xfffd6f3e),
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Icon(
-                                  Icons.add,
-                                  color: Colors.white,
-                                ))
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20.0),
-                    margin: EdgeInsets.only(right: 20.0),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Column(
-                      children: [
-                        Image.asset("images/watch2.png",
-                            height: 150, width: 150, fit: BoxFit.cover),
-                        Text(
-                          "Apple Watch",
-                          style: AppWidget.semiBoldTextFeildStyle(),
-                        ),
-                        SizedBox(
-                          height: 10.0,
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              "\$150",
-                              style: TextStyle(
-                                  color: Color(0xFFfd6f3e),
-                                  fontSize: 22.0,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(
-                              width: 50.0,
-                            ),
-                            Container(
-                                padding: EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                    color: Color(0xfffd6f3e),
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Icon(
-                                  Icons.add,
-                                  color: Colors.white,
-                                ))
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20.0),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Column(
-                      children: [
-                        Image.asset("images/laptop2.png",
-                            height: 150, width: 150, fit: BoxFit.cover),
-                        Text(
-                          "Laptop",
-                          style: AppWidget.semiBoldTextFeildStyle(),
-                        ),
-                        SizedBox(
-                          height: 10.0,
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              "\$300",
-                              style: TextStyle(
-                                  color: Color(0xFFfd6f3e),
-                                  fontSize: 22.0,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(
-                              width: 50.0,
-                            ),
-                            Container(
-                                padding: EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                    color: Color(0xfffd6f3e),
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Icon(
-                                  Icons.add,
-                                  color: Colors.white,
-                                ))
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
+                  // Sử dụng hàm helper để xây dựng thẻ sản phẩm
+                  buildProductCard("images/headphone2.png", "Headphone", "\$100"),
+                  buildProductCard("images/watch2.png", "Apple Watch", "\$150"),
+                  buildProductCard("images/laptop2.png", "Laptop", "\$300"),
                 ],
               ),
             ),
@@ -283,31 +164,78 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-}
 
-class CategoryTile extends StatelessWidget {
-  final String image;
-
-  const CategoryTile({super.key, required this.image});
-
-  @override
-  Widget build(BuildContext context) {
+  // Hàm helper để xây dựng thẻ sản phẩm
+  Widget buildProductCard(String imagePath, String title, String price) {
     return Container(
-      padding: EdgeInsets.all(20),
-      margin: EdgeInsets.only(right: 20.0),
+      margin: const EdgeInsets.only(right: 20.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       decoration: BoxDecoration(
           color: Colors.white, borderRadius: BorderRadius.circular(10)),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Image.asset(
-            image,
-            height: 55,
-            width: 55,
-            fit: BoxFit.cover,
+          Image.asset(imagePath, height: 150, width: 150, fit: BoxFit.cover),
+          Text(
+            title,
+            style: AppWidget.semiBoldTextFeildStyle(),
           ),
-          Icon(Icons.arrow_forward)
+          const SizedBox(height: 10.0),
+          Row(
+            children: [
+              Text(
+                price,
+                style: const TextStyle(
+                    color: Color(0xFFfd6f3e),
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(width: 50.0),
+              Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                    color: Color(0xfffd6f3e),
+                    borderRadius: BorderRadius.circular(10)),
+                child: const Icon(
+                  Icons.add,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class CategoryTile extends StatelessWidget {
+  final String image, name;
+
+  const CategoryTile({super.key, required this.image, required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryProducts(category: name)));
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        margin: const EdgeInsets.only(right: 20.0),
+        decoration: BoxDecoration(
+            color: Colors.white, borderRadius: BorderRadius.circular(10)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Image.asset(
+              image,
+              height: 55,
+              width: 55,
+              fit: BoxFit.cover,
+            ),
+            const Icon(Icons.arrow_forward),
+          ],
+        ),
       ),
     );
   }
