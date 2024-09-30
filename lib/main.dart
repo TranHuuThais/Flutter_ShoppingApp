@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:shoppingapp/admin/add_product.dart';
 import 'package:shoppingapp/admin/admin_login.dart';
 import 'package:shoppingapp/pages/bottomnav.dart';
@@ -8,10 +9,12 @@ import 'package:shoppingapp/pages/login.dart';
 import 'package:shoppingapp/pages/onboarding.dart';
 import 'package:shoppingapp/pages/product_detail.dart';
 import 'package:shoppingapp/pages/signup.dart';
+import 'package:shoppingapp/services/constan.dart';
 
 void main() async{
   runApp(const MyApp());
    WidgetsFlutterBinding.ensureInitialized();
+   Stripe.publishableKey=Publickey;
   await Firebase.initializeApp();
   runApp(const MyApp());
 }

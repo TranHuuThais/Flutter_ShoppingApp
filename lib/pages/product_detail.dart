@@ -1,22 +1,53 @@
+import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:shoppingapp/services/constan.dart';
+import 'package:shoppingapp/services/database.dart';
+import 'package:shoppingapp/services/shared_pref.dart';
 import 'package:shoppingapp/widget/support_widget.dart';
+import 'package:http/http.dart' as http;
 
 class ProductDetail extends StatefulWidget {
-  const ProductDetail({super.key});
-
+  final String name, image, price, detail;
+  ProductDetail(
+      {required this.name,
+      required this.price,
+      required this.detail,
+      required this.image});
   @override
   State<ProductDetail> createState() => _ProductDetailState();
 }
 
 class _ProductDetailState extends State<ProductDetail> {
+  String? name, email, image;
+
+  getthesharedpref() async {
+    name = await SharedPreferenceHelper().getUserName();
+    email = await SharedPreferenceHelper().getUserEmail();
+    image = await SharedPreferenceHelper().getUserImage();
+    setState(() {});
+  }
+
+  ontheload() async {
+    await getthesharedpref();
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    ontheload();
+  }
+
+  Map<String, dynamic>? paymentIntent;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xfffef5f1),
       body: Container(
-        padding: EdgeInsets.only(
-          top: 50.0,
-        ),
+        padding: EdgeInsets.only(top: 50.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -34,9 +65,9 @@ class _ProductDetailState extends State<ProductDetail> {
                     child: Icon(Icons.arrow_back_ios_new_outlined)),
               ),
               Center(
-                  child: Image.asset(
-                "images/headphone2.png",
-                height: 400,
+                  child: Image.network(
+                widget.image,
+                height: 300,
               ))
             ]),
             Expanded(
@@ -55,10 +86,10 @@ class _ProductDetailState extends State<ProductDetail> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Headphone",
+                          widget.name,
                           style: AppWidget.boldTextFeildStyle(),
                         ),
-                        Text("\$300",
+                        Text("\$" + widget.price,
                             style: TextStyle(
                                 color: Color(0xFFfd6f3e),
                                 fontSize: 23.0,
@@ -75,22 +106,28 @@ class _ProductDetailState extends State<ProductDetail> {
                     SizedBox(
                       height: 10.0,
                     ),
-                    Text(
-                        "The product is very good. It have a 1 year waranty, These headphone are too good like you can also listen a person who is speaking slowly."),
-                    SizedBox(height: 130.0,),
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 15.0),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFfd6f3e),borderRadius: BorderRadius.circular(10)
-                      ),
-                      width: MediaQuery.of(context).size.width,
-                      child: Center(
-                        child: Text(
-                          "Buy now",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold),
+                    Text(widget.detail),
+                    SizedBox(
+                      height: 190.0,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        makePayment(widget.price);
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 20.0),
+                        decoration: BoxDecoration(
+                            color: Color(0xFFfd6f3e),
+                            borderRadius: BorderRadius.circular(10)),
+                        width: MediaQuery.of(context).size.width,
+                        child: Center(
+                          child: Text(
+                            "Buy now",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
                     )
@@ -102,5 +139,94 @@ class _ProductDetailState extends State<ProductDetail> {
         ),
       ),
     );
+  }
+
+  Future<void> makePayment(String amount) async {
+    try {
+      paymentIntent =
+          await createPaymentIntent(amount, 'USD'); // Use correct currency code
+      await Stripe.instance.initPaymentSheet(
+          paymentSheetParameters: SetupPaymentSheetParameters(
+        paymentIntentClientSecret:
+            paymentIntent!['client_secret'], // Correct key name
+        style: ThemeMode.light,
+        merchantDisplayName: 'Your Shop Name',
+      ));
+
+      displayPaymentSheet();
+    } catch (e, s) {
+      print('Exception during makePayment: $e, StackTrace: $s');
+    }
+  }
+
+  displayPaymentSheet() async {
+    try {
+      await Stripe.instance.presentPaymentSheet().then((value) async {
+        Map<String, dynamic> orderInfoMap = {
+          "Product": widget.name,
+          "Price": widget.price,
+          "Name": name,
+          "Email": email,
+          "Image": image,
+          "ProductImage": widget.image,
+          "Status": "On the way",
+        };
+        await DatabaseMethods().orderDetails(orderInfoMap);
+        showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                      ),
+                      Text("Payment Successful"),
+                    ],
+                  ),
+                ));
+        paymentIntent = null;
+      }).onError((error, stackTrace) {
+        print("Error during payment: $error, StackTrace: $stackTrace");
+      });
+    } on StripeException catch (e) {
+      print("StripeException: $e");
+      showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+                content: Text("Payment Cancelled"),
+              ));
+    } catch (e) {
+      print('Exception during displayPaymentSheet: $e');
+    }
+  }
+
+  createPaymentIntent(String amount, String currency) async {
+    try {
+      Map<String, dynamic> body = {
+        'amount': calculateAmount(amount),
+        'currency': currency,
+        'payment_method_types[]': 'card',
+      };
+
+      var response = await http.post(
+        Uri.parse('https://api.stripe.com/v1/payment_intents'),
+        headers: {
+          'Authorization': 'Bearer $Secretkey', // Correct Bearer key
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: body,
+      );
+
+      return jsonDecode(response.body);
+    } catch (err) {
+      print('Error during createPaymentIntent: ${err.toString()}');
+    }
+  }
+
+  calculateAmount(String amount) {
+    final calculatedAmount = (int.parse(amount) * 100);
+    return calculatedAmount.toString();
   }
 }

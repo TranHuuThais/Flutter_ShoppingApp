@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shoppingapp/pages/category_products.dart';
+import 'package:shoppingapp/services/shared_pref.dart';
 import 'package:shoppingapp/widget/support_widget.dart';
 
 class Home extends StatefulWidget {
@@ -17,17 +18,36 @@ class _HomeState extends State<Home> {
     "images/TV.png",
   ];
   List Categoryname = [
-    "Headphones",  
-    "TV",
+    "Headphones",
     "Laptop",
     "Watch",
+    "TV",
   ];
+  String? name, image;
+
+  getTheSharedPref() async {
+    SharedPreferenceHelper sharedPreferenceHelper = SharedPreferenceHelper();
+    name = await sharedPreferenceHelper.getUserName();
+    image = await sharedPreferenceHelper.getUserImage();
+    setState(() {});
+  }
+
+  ontheload() async {
+    await getTheSharedPref();
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    ontheload();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff2f2f2),
-      body: Container(
+      body: name==null?Center(child: CircularProgressIndicator()): Container(
         margin: const EdgeInsets.only(top: 45.0, right: 20.0, left: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,7 +59,7 @@ class _HomeState extends State<Home> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Hey, Huuthai",
+                      "Hey, "+name!,
                       style: AppWidget.boldTextFeildStyle(),
                     ),
                     Text(
@@ -50,7 +70,7 @@ class _HomeState extends State<Home> {
                 ),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: Image.asset("images/boy.jpg",
+                  child: Image.network(image!,
                       height: 80, width: 80, fit: BoxFit.cover),
                 ),
               ],
@@ -153,7 +173,8 @@ class _HomeState extends State<Home> {
                 scrollDirection: Axis.horizontal,
                 children: [
                   // Sử dụng hàm helper để xây dựng thẻ sản phẩm
-                  buildProductCard("images/headphone2.png", "Headphone", "\$100"),
+                  buildProductCard(
+                      "images/headphone2.png", "Headphone", "\$100"),
                   buildProductCard("images/watch2.png", "Apple Watch", "\$150"),
                   buildProductCard("images/laptop2.png", "Laptop", "\$300"),
                 ],
@@ -217,7 +238,10 @@ class CategoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryProducts(category: name)));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => CategoryProducts(category: name)));
       },
       child: Container(
         padding: const EdgeInsets.all(20),

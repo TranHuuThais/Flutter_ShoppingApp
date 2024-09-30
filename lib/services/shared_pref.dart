@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferenceHelper {
@@ -13,7 +15,7 @@ class SharedPreferenceHelper {
 
   Future<bool> saveUserName(String getUserName) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.setString(userIdkey, getUserName);
+    return prefs.setString(userNamekey, getUserName);
   }
 
   Future<bool> saveUserEmail(String getUserEmail) async {
@@ -40,7 +42,7 @@ class SharedPreferenceHelper {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString(userEmailkey);
   }
-  
+
   Future<String?> getUserImage() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString(userImagekey);
