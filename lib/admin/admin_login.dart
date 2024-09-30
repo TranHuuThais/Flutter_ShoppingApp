@@ -117,7 +117,7 @@ class _AdminLoginState extends State<AdminLogin> {
             )));
         }
         else{
-          Navigator.push(context, MaterialPageRoute(builder: (context)=> HomaAdmin()));
+          Navigator.push(context, MaterialPageRoute(builder: (context)=> HomeAdmin()));
         }
       });
     });

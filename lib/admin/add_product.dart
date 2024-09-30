@@ -37,22 +37,30 @@ class _AddProductState extends State<AddProduct> {
           FirebaseStorage.instance.ref().child("blogImage").child(addId);
       final UploadTask task = firebaseStorageRef.putFile(selectedImage!);
       var dowloadUrl = await (await task).ref.getDownloadURL();
+      String firstletter = namecontroller.text.substring(0, 1).toUpperCase();
 
       Map<String, dynamic> addProduct = {
         "Name": namecontroller.text,
         "Image": dowloadUrl,
-        "Price":pricecontroller.text,
-        "Detail":detailscontroller.text,
+        "SearchKey": firstletter,
+        "UpdatedName": namecontroller.text.toUpperCase(),
+        "Price": pricecontroller.text,
+        "Detail": detailscontroller.text,
       };
-      await DatabaseMethods().addProduct(addProduct, value!).then((value) {});
-      selectedImage = null;
-      namecontroller.text = "";
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.redAccent,
-          content: const Text(
-            "product has been uploaded Successfully!!!",
-            style: TextStyle(fontSize: 20.0),
-          )));
+
+      await DatabaseMethods()
+          .addProduct(addProduct, value!)
+          .then((value) async {
+            await DatabaseMethods().addAllProducts(addProduct);
+        selectedImage = null;
+        namecontroller.text = "";
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: Colors.redAccent,
+            content: const Text(
+              "product has been uploaded Successfully!!!",
+              style: TextStyle(fontSize: 20.0),
+            )));
+      });
     }
   }
 
@@ -75,7 +83,8 @@ class _AddProductState extends State<AddProduct> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          margin: EdgeInsets.only(left: 20.0, top: 20.0, right: 20.0,bottom: 20.0),
+          margin:
+              EdgeInsets.only(left: 20.0, top: 20.0, right: 20.0, bottom: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -110,7 +119,8 @@ class _AddProductState extends State<AddProduct> {
                           height: 150,
                           width: 150,
                           decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black, width: 1.5),
+                              border:
+                                  Border.all(color: Colors.black, width: 1.5),
                               borderRadius: BorderRadius.circular(20)),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(20),

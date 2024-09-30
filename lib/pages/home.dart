@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shoppingapp/pages/category_products.dart';
+import 'package:shoppingapp/pages/product_detail.dart';
+import 'package:shoppingapp/services/database.dart';
 import 'package:shoppingapp/services/shared_pref.dart';
 import 'package:shoppingapp/widget/support_widget.dart';
 
@@ -11,35 +14,74 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List categories = [
+  bool search = false;
+  List<String> categories = [
     "images/headphone_icon.png",
     "images/laptop.png",
     "images/watch.png",
     "images/TV.png",
   ];
-  List Categoryname = [
+  List<String> categoryNames = [
     "Headphones",
     "Laptop",
     "Watch",
     "TV",
   ];
+
+  List<dynamic> queryResultSet = [];
+  List<dynamic> tempSearchStore = [];
+  TextEditingController searchcontroller = new TextEditingController();
+
+  void initiateSearch(String value) {
+    if (value.isEmpty) {
+      setState(() {
+        queryResultSet = [];
+        tempSearchStore = [];
+        search = false;
+      });
+      return;
+    }
+
+    setState(() {
+      search = true;
+    });
+
+    DatabaseMethods().search(value).then((QuerySnapshot docs) {
+      if (docs.docs.isEmpty) {
+        setState(() {
+          tempSearchStore = [];
+        });
+        return;
+      }
+
+      queryResultSet = docs.docs.map((doc) => doc.data()).toList();
+
+      tempSearchStore = queryResultSet.where((element) {
+        return element['UpdatedName']
+            .toLowerCase()
+            .startsWith(value.toLowerCase());
+      }).toList();
+
+      setState(() {});
+    });
+  }
+
   String? name, image;
 
-  getTheSharedPref() async {
+  Future<void> getTheSharedPref() async {
     SharedPreferenceHelper sharedPreferenceHelper = SharedPreferenceHelper();
     name = await sharedPreferenceHelper.getUserName();
     image = await sharedPreferenceHelper.getUserImage();
     setState(() {});
   }
 
-  ontheload() async {
+  Future<void> onTheLoad() async {
     await getTheSharedPref();
-    setState(() {});
   }
 
   @override
   void initState() {
-    ontheload();
+    onTheLoad();
     super.initState();
   }
 
@@ -47,146 +89,183 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff2f2f2),
-      body: name==null?Center(child: CircularProgressIndicator()): Container(
-        margin: const EdgeInsets.only(top: 45.0, right: 20.0, left: 20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Hey, "+name!,
-                      style: AppWidget.boldTextFeildStyle(),
-                    ),
-                    Text(
-                      "Good Morning",
-                      style: AppWidget.LightTextFeildStyle(),
-                    ),
-                  ],
-                ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.network(image!,
-                      height: 80, width: 80, fit: BoxFit.cover),
-                ),
-              ],
-            ),
-            const SizedBox(height: 30.0),
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(10)),
-              width: MediaQuery.of(context).size.width,
-              child: TextField(
-                decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: "Search Products",
-                    hintStyle: AppWidget.LightTextFeildStyle(),
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: Colors.black,
-                    )),
-              ),
-            ),
-            const SizedBox(height: 20.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Categories",
-                  style: AppWidget.semiBoldTextFeildStyle(),
-                ),
-                const Text(
-                  "See all",
-                  style: TextStyle(
-                      color: Color(0xFFfd6f3e),
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20.0),
-            Row(
-              children: [
-                Container(
-                  height: 130,
-                  padding: const EdgeInsets.all(20),
-                  margin: const EdgeInsets.only(right: 20.0),
-                  decoration: BoxDecoration(
-                      color: Color(0xFFFD6F3E),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Center(
-                    child: Text(
-                      "All",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 20.0),
-                    height: 130,
-                    child: ListView.builder(
-                      padding: EdgeInsets.zero,
-                      itemCount: categories.length,
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (context, index) {
-                        return CategoryTile(
-                          image: categories[index],
-                          name: Categoryname[index],
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 30.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "All Products",
-                  style: AppWidget.semiBoldTextFeildStyle(),
-                ),
-                const Text(
-                  "See all",
-                  style: TextStyle(
-                      color: Color(0xFFfd6f3e),
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20.0),
-            Container(
-              height: 240,
-              child: ListView(
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
+      body: name == null
+          ? const Center(child: CircularProgressIndicator())
+          : Container(
+              margin: const EdgeInsets.only(top: 45.0, right: 20.0, left: 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Sử dụng hàm helper để xây dựng thẻ sản phẩm
-                  buildProductCard(
-                      "images/headphone2.png", "Headphone", "\$100"),
-                  buildProductCard("images/watch2.png", "Apple Watch", "\$150"),
-                  buildProductCard("images/laptop2.png", "Laptop", "\$300"),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Hey, $name!",
+                            style: AppWidget.boldTextFeildStyle(),
+                          ),
+                          const Text(
+                            "Good Morning",
+                          ),
+                        ],
+                      ),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: image != null
+                            ? Image.network(image!,
+                                height: 80, width: 80, fit: BoxFit.cover)
+                            : const SizedBox(
+                                height: 80,
+                                width: 80,
+                                child: CircularProgressIndicator()),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 30.0),
+                  Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10)),
+                    width: MediaQuery.of(context).size.width,
+                    child: TextField(
+                      controller: searchcontroller,
+                      onChanged: (value) => initiateSearch(value.toUpperCase()),
+                      decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Search Products",
+                          hintStyle: AppWidget.LightTextFeildStyle(),
+                          prefixIcon: search
+                              ? GestureDetector(
+                                  onTap: () {
+                                    search = false;
+                                    tempSearchStore = [];
+                                    queryResultSet = [];
+                                    searchcontroller.text = "";
+                                    setState(() {});
+                                  },
+                                  child: Icon(Icons.close))
+                              : Icon(
+                                  Icons.search,
+                                  color: Colors.black,
+                                )),
+                    ),
+                  ),
+                  const SizedBox(height: 20.0),
+                  search
+                      ? ListView(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          primary: false,
+                          shrinkWrap: true,
+                          children: tempSearchStore.map((element) {
+                            return buildResultCard(element);
+                          }).toList(),
+                        )
+                      : Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 20.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Categories",
+                                    style: AppWidget.semiBoldTextFeildStyle(),
+                                  ),
+                                  const Text(
+                                    "See all",
+                                    style: TextStyle(
+                                        color: Color(0xFFfd6f3e),
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20.0),
+                            Row(
+                              children: [
+                                Container(
+                                  height: 130,
+                                  padding: const EdgeInsets.all(20),
+                                  margin: const EdgeInsets.only(right: 20.0),
+                                  decoration: BoxDecoration(
+                                      color: const Color(0xFFFD6F3E),
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: Center(
+                                    child: Text(
+                                      "All",
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20.0,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    margin: const EdgeInsets.only(left: 20.0),
+                                    height: 130,
+                                    child: ListView.builder(
+                                      padding: EdgeInsets.zero,
+                                      itemCount: categories.length,
+                                      shrinkWrap: true,
+                                      scrollDirection: Axis.horizontal,
+                                      itemBuilder: (context, index) {
+                                        return CategoryTile(
+                                          image: categories[index],
+                                          name: categoryNames[index],
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 30.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "All Products",
+                                  style: AppWidget.semiBoldTextFeildStyle(),
+                                ),
+                                const Text(
+                                  "See all",
+                                  style: TextStyle(
+                                      color: Color(0xFFfd6f3e),
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20.0),
+                            Container(
+                              height: 240,
+                              child: ListView(
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                children: [
+                                  buildProductCard("images/headphone2.png",
+                                      "Headphone", "\$100"),
+                                  buildProductCard("images/watch2.png",
+                                      "Apple Watch", "\$150"),
+                                  buildProductCard(
+                                      "images/laptop2.png", "Laptop", "\$300"),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 
-  // Hàm helper để xây dựng thẻ sản phẩm
+  // Helper method to build a product card
   Widget buildProductCard(String imagePath, String title, String price) {
     return Container(
       margin: const EdgeInsets.only(right: 20.0),
@@ -214,7 +293,7 @@ class _HomeState extends State<Home> {
               Container(
                 padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
-                    color: Color(0xfffd6f3e),
+                    color: const Color(0xfffd6f3e),
                     borderRadius: BorderRadius.circular(10)),
                 child: const Icon(
                   Icons.add,
@@ -224,6 +303,43 @@ class _HomeState extends State<Home> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  // Method to build the search result card
+  Widget buildResultCard(dynamic data) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ProductDetail(
+                      detail: data["Detail"],
+                      image: data["Image"],
+                      name: data["Name"],
+                      price: data["Price"],
+                    )));
+      },
+      child: Container(
+        padding: EdgeInsets.only(left: 20.0),
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        height: 100,
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(data["Image"],
+                  height: 70, width: 70, fit: BoxFit.cover),
+            ),
+            const SizedBox(width: 20.0),
+            Text(data["Name"], style: AppWidget.semiBoldTextFeildStyle()),
+          ],
+        ),
       ),
     );
   }

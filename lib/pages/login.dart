@@ -25,7 +25,8 @@ class _LoginState extends State<Login> {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      Navigator.push(context, MaterialPageRoute(builder: (context) => Bottomnav()));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => Bottomnav()));
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -148,15 +149,15 @@ class _LoginState extends State<Login> {
                   height: 50.0,
                 ),
                 GestureDetector(
-                     onTap: (){
-                          if(_formkey.currentState!.validate()){
-                            setState(() {
-                              email=emailcontroller.text;
-                              password=passwordcontroller.text;
-                            });
-                          }
-                          userLogin();
-                        },
+                  onTap: () {
+                    if (_formkey.currentState!.validate()) {
+                      setState(() {
+                        email = emailcontroller.text;
+                        password = passwordcontroller.text;
+                      });
+                    }
+                    userLogin();
+                  },
                   child: Center(
                     child: Container(
                       width: MediaQuery.of(context).size.width / 2,
@@ -164,7 +165,7 @@ class _LoginState extends State<Login> {
                       decoration: BoxDecoration(
                           color: Colors.green,
                           borderRadius: BorderRadius.circular(10)),
-                      child: Center(                    
+                      child: Center(
                           child: Text("LOGIN",
                               style: TextStyle(
                                   color: Colors.white,
