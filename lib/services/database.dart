@@ -17,6 +17,10 @@ class DatabaseMethods {
         .add(userInfoMap);
   }
 
+  Stream<QuerySnapshot> getAllProducts() {
+    return FirebaseFirestore.instance.collection("Products").snapshots();
+  }
+
   Future addProduct(
       Map<String, dynamic> userInfoMap, String categoryname) async {
     return await FirebaseFirestore.instance

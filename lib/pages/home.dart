@@ -7,7 +7,7 @@ import 'package:shoppingapp/services/shared_pref.dart';
 import 'package:shoppingapp/widget/support_widget.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  const Home({Key? key}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -30,7 +30,8 @@ class _HomeState extends State<Home> {
 
   List<dynamic> queryResultSet = [];
   List<dynamic> tempSearchStore = [];
-  TextEditingController searchcontroller = new TextEditingController();
+  TextEditingController searchController = TextEditingController();
+  late Stream<QuerySnapshot> allProductsStream;
 
   void initiateSearch(String value) {
     if (value.isEmpty) {
@@ -75,14 +76,16 @@ class _HomeState extends State<Home> {
     setState(() {});
   }
 
-  Future<void> onTheLoad() async {
+  Future<void> onTheProductLoad() async {
+    allProductsStream = DatabaseMethods().getAllProducts(); // Initialize stream
     await getTheSharedPref();
   }
 
   @override
   void initState() {
-    onTheLoad();
     super.initState();
+    getTheSharedPref();
+    onTheProductLoad();
   }
 
   @override
@@ -96,250 +99,288 @@ class _HomeState extends State<Home> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Hey, $name!",
-                            style: AppWidget.boldTextFeildStyle(),
-                          ),
-                          const Text(
-                            "Good Morning",
-                          ),
-                        ],
-                      ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: image != null
-                            ? Image.network(image!,
-                                height: 80, width: 80, fit: BoxFit.cover)
-                            : const SizedBox(
-                                height: 80,
-                                width: 80,
-                                child: CircularProgressIndicator()),
-                      ),
-                    ],
-                  ),
+                  buildUserInfo(),
                   const SizedBox(height: 30.0),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10)),
-                    width: MediaQuery.of(context).size.width,
-                    child: TextField(
-                      controller: searchcontroller,
-                      onChanged: (value) => initiateSearch(value.toUpperCase()),
-                      decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Search Products",
-                          hintStyle: AppWidget.LightTextFeildStyle(),
-                          prefixIcon: search
-                              ? GestureDetector(
-                                  onTap: () {
-                                    search = false;
-                                    tempSearchStore = [];
-                                    queryResultSet = [];
-                                    searchcontroller.text = "";
-                                    setState(() {});
-                                  },
-                                  child: Icon(Icons.close))
-                              : Icon(
-                                  Icons.search,
-                                  color: Colors.black,
-                                )),
-                    ),
-                  ),
+                  buildSearchField(),
                   const SizedBox(height: 20.0),
-                  search
-                      ? ListView(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          primary: false,
-                          shrinkWrap: true,
-                          children: tempSearchStore.map((element) {
-                            return buildResultCard(element);
-                          }).toList(),
-                        )
-                      : Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(right: 20.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Categories",
-                                    style: AppWidget.semiBoldTextFeildStyle(),
-                                  ),
-                                  const Text(
-                                    "See all",
-                                    style: TextStyle(
-                                        color: Color(0xFFfd6f3e),
-                                        fontSize: 20.0,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 20.0),
-                            Row(
-                              children: [
-                                Container(
-                                  height: 130,
-                                  padding: const EdgeInsets.all(20),
-                                  margin: const EdgeInsets.only(right: 20.0),
-                                  decoration: BoxDecoration(
-                                      color: const Color(0xFFFD6F3E),
-                                      borderRadius: BorderRadius.circular(10)),
-                                  child: Center(
-                                    child: Text(
-                                      "All",
-                                      style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20.0,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Container(
-                                    margin: const EdgeInsets.only(left: 20.0),
-                                    height: 130,
-                                    child: ListView.builder(
-                                      padding: EdgeInsets.zero,
-                                      itemCount: categories.length,
-                                      shrinkWrap: true,
-                                      scrollDirection: Axis.horizontal,
-                                      itemBuilder: (context, index) {
-                                        return CategoryTile(
-                                          image: categories[index],
-                                          name: categoryNames[index],
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 30.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "All Products",
-                                  style: AppWidget.semiBoldTextFeildStyle(),
-                                ),
-                                const Text(
-                                  "See all",
-                                  style: TextStyle(
-                                      color: Color(0xFFfd6f3e),
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 20.0),
-                            Container(
-                              height: 240,
-                              child: ListView(
-                                shrinkWrap: true,
-                                scrollDirection: Axis.horizontal,
-                                children: [
-                                  buildProductCard("images/headphone2.png",
-                                      "Headphone", "\$100"),
-                                  buildProductCard("images/watch2.png",
-                                      "Apple Watch", "\$150"),
-                                  buildProductCard(
-                                      "images/laptop2.png", "Laptop", "\$300"),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                  search ? buildSearchResults() : buildCategoriesAndProducts(),
                 ],
               ),
             ),
     );
   }
 
-  // Helper method to build a product card
-  Widget buildProductCard(String imagePath, String title, String price) {
+  Widget buildUserInfo() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Hey, $name!",
+              style: AppWidget.boldTextFeildStyle(),
+            ),
+            const Text(
+              "Good Morning",
+            ),
+          ],
+        ),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: image != null
+              ? Image.network(image!, height: 80, width: 80, fit: BoxFit.cover)
+              : const SizedBox(
+                  height: 80,
+                  width: 80,
+                  child: CircularProgressIndicator(),
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildSearchField() {
     return Container(
-      margin: const EdgeInsets.only(right: 20.0),
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(10)),
-      child: Column(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      width: MediaQuery.of(context).size.width,
+      child: TextField(
+        controller: searchController,
+        onChanged: (value) => initiateSearch(value),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: "Search Products",
+          hintStyle: AppWidget.LightTextFeildStyle(),
+          prefixIcon: search
+              ? GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      search = false;
+                      tempSearchStore = [];
+                      queryResultSet = [];
+                      searchController.text = "";
+                    });
+                  },
+                  child: const Icon(Icons.close),
+                )
+              : const Icon(
+                  Icons.search,
+                  color: Colors.black,
+                ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildSearchResults() {
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      primary: false,
+      shrinkWrap: true,
+      children: tempSearchStore.map((element) {
+        return buildProductCard(
+          element['Image'],
+          element['UpdatedName'],
+          "\$${element['Price']}",
+          element,
+        );
+      }).toList(),
+    );
+  }
+
+  Widget buildCategoriesAndProducts() {
+    return Column(
+      children: [
+        buildCategoryHeader(),
+        const SizedBox(height: 20.0),
+        buildCategoryList(),
+        const SizedBox(height: 30.0),
+        buildProductHeader(),
+        const SizedBox(height: 30.0),
+        buildProductStream(),
+      ],
+    );
+  }
+
+  Widget buildCategoryHeader() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 20.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Image.asset(imagePath, height: 150, width: 150, fit: BoxFit.cover),
           Text(
-            title,
+            "Categories",
             style: AppWidget.semiBoldTextFeildStyle(),
           ),
-          const SizedBox(height: 10.0),
-          Row(
-            children: [
-              Text(
-                price,
-                style: const TextStyle(
-                    color: Color(0xFFfd6f3e),
-                    fontSize: 22.0,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 50.0),
-              Container(
-                padding: const EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                    color: const Color(0xfffd6f3e),
-                    borderRadius: BorderRadius.circular(10)),
-                child: const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                ),
-              ),
-            ],
+          const Text(
+            "See all",
+            style: TextStyle(
+              color: Color(0xFFfd6f3e),
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
     );
   }
 
-  // Method to build the search result card
-  Widget buildResultCard(dynamic data) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ProductDetail(
-                      detail: data["Detail"],
-                      image: data["Image"],
-                      name: data["Name"],
-                      price: data["Price"],
-                    )));
-      },
-      child: Container(
-        padding: EdgeInsets.only(left: 20.0),
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        height: 100,
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.network(data["Image"],
-                  height: 70, width: 70, fit: BoxFit.cover),
+  Widget buildCategoryList() {
+    return Row(
+      children: [
+        Container(
+          height: 130,
+          padding: const EdgeInsets.all(20),
+          margin: const EdgeInsets.only(right: 20.0),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFD6F3E),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Center(
+            child: const Text(
+              "All",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(width: 20.0),
-            Text(data["Name"], style: AppWidget.semiBoldTextFeildStyle()),
-          ],
+          ),
         ),
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.only(left: 20.0),
+            height: 130,
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: categories.length,
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) {
+                return CategoryTile(
+                  image: categories[index],
+                  name: categoryNames[index],
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildProductHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "All Products",
+          style: AppWidget.semiBoldTextFeildStyle(),
+        ),
+        const Text(
+          "See all",
+          style: TextStyle(
+            color: Color(0xFFfd6f3e),
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildProductStream() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: allProductsStream,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        } else {
+          return Container(
+            height: 240,
+            child: ListView(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              children: snapshot.data!.docs.map((doc) {
+                var data = doc.data() as Map<String, dynamic>;
+                return buildProductCard(
+                  data["Image"],
+                  data["Name"],
+                  "\$${data["Price"]}",
+                  data,
+                );
+              }).toList(),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  // Helper method to build a product card
+  Widget buildProductCard(
+      String imageUrl, String title, String price, dynamic data) {
+    return Container(
+      margin: const EdgeInsets.only(right: 20.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          Image.network(imageUrl, height: 140, width: 150, fit: BoxFit.cover),
+          Text(title, style: AppWidget.semiBoldTextFeildStyle()),
+          SizedBox(
+            height: 10.0,
+          ),
+          Row(
+            mainAxisAlignment:
+                MainAxisAlignment.spaceBetween, // Aligns items in the row
+            children: [
+              Text(
+                price,
+                style: const TextStyle(
+                  color: Color.fromARGB(255, 168, 39, 39),
+                  fontSize: 20.0, // Change this to your desired font size
+                ),
+              ),
+              SizedBox(
+                width: 10.0,
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductDetail(
+                        name: data["Name"],
+                        price: data["Price"],
+                        detail: data["Detail"],
+                        image: data["Image"],
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFD6F3E),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.all(8.0), // Add some padding
+                  child: Icon(
+                    Icons.add,
+                    size: 24.0, // Adjust icon size
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
